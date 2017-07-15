@@ -1,12 +1,9 @@
 package com.ashwin.locationdemo;
 
-import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -17,10 +14,13 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class MainActivity extends AppCompatActivity implements PermissionCallback{
+public class MainActivity extends AppCompatActivity implements
+        PermissionCallback,
+        LocationCallback{
 
     private FusedLocationProviderClient mFusedLocationProviderClient;
     private TextView mLatitudeHolder;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,40 +34,20 @@ public class MainActivity extends AppCompatActivity implements PermissionCallbac
     protected void onResume() {
         super.onResume();
         Permissions.init(this);
+        LocationUtil.init(this);
         //This makes sure that the runtime permission checking is only done for devices
         //running on versions greater than or equal to LOLLIPOP
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             if (!Permissions.checkPermissions())
                 Permissions.requestPermission();
             else
-                getLastLocation();
+                LocationUtil.getLocation();
         }
         else {
-            getLastLocation();
+            LocationUtil.getLocation();
         }
     }
-
-
-
-    //Suppresses the missing permission request warning, but we should make sure that we
-    //reach this method only after we have the required permission from the user
-    @SuppressWarnings("MissingPermission")
-    private void getLastLocation() {
-        mFusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(MainActivity.this, new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if(location!=null) {
-                            mLatitudeHolder.setText("" + location.getLatitude());
-                        }
-                        else {
-                            Toast.makeText(MainActivity.this, "Location not fetched",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-                });
-    }
-
+    
 
     @Override
     public void showSnackBar(int explanation_string, int action_string,
@@ -90,12 +70,6 @@ public class MainActivity extends AppCompatActivity implements PermissionCallbac
 
 
 
-
-
-
-
-
-
     //This is the callback which gets called when the user presses a button (DENY OR ACCEPT)
     //when requesting for given permission
     @Override
@@ -110,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements PermissionCallbac
                 if(grantResults.length>0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     //PERMISSION GRANTED
-                    getLastLocation();
+                    LocationUtil.getLocation();
                 }
                 else {
                     //PERMISSION DENIED
@@ -126,6 +100,17 @@ public class MainActivity extends AppCompatActivity implements PermissionCallbac
                     // touches or interactions which have required permissions.
 
                 }
+        }
+    }
+
+    @Override
+    public void locationCallback(Location location) {
+        if(location==null){
+            Toast.makeText(MainActivity.this, "Location not found", Toast.LENGTH_LONG)
+                    .show();
+        }
+        else {
+            mLatitudeHolder.setText(location.getLatitude() + "");
         }
     }
 }
