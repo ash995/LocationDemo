@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">LocationDemo</string>
+    <string name="location_rationale_string">
+        Location Services are instrumental in the functioning of the application,
+        hence you must grant the application permission to receive location updates
+    </string>
+    <string name="location_request_action_string">
+        ALLOW PERMISSION
+    </string>
+</resources>
